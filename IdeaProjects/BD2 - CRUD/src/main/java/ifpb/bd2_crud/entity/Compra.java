@@ -15,8 +15,15 @@ public class Compra {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
     private LocalDateTime dataCompra;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @JoinTable(name = "compra_produtos", joinColumns = @JoinColumn(name = "compra_id"), inverseJoinColumns = @JoinColumn(name = "produto_id"))
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {CascadeType.MERGE, CascadeType.PERSIST}
+    )
+    @JoinTable(
+            name = "compra_produtos",
+            joinColumns = @JoinColumn(name = "compra_id"),
+            inverseJoinColumns = @JoinColumn(name = "produto_id")
+    )
     private List<Produto> produtosCompra = new ArrayList<>();
     @Column(precision = 10, scale = 2, nullable = true)
     private BigDecimal valorCompra;
@@ -34,15 +41,6 @@ public class Compra {
         this.valorCompra = getValorTotal();
         this.formaPagamento = formaPagamento;
     }
-
-//    @PrePersist
-//    @PreUpdate
-//    private void updateValorCompra() {
-//        this.valorCompra = getValorTotal();
-//        if (this.dataCompra == null) {
-//            this.dataCompra = LocalDateTime.now();
-//        }
-//    }
 
     public BigDecimal getValorTotal() {
         List<Produto> produtosCompra = this.produtosCompra;
