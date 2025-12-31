@@ -16,7 +16,7 @@ A aplicação expõe uma **API REST** que retorna os dados em formato **JSON**.
         - Registro de compras
         - Consulta de compras
         - Validação de dados de compra
-        - 
+          
 - Tratamento centralizado de exceções:
     - Produto não encontrado
     - Produto inválido
