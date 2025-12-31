@@ -1,16 +1,21 @@
 package ifpb.api_caixa_supermercado.service;
 
+import ifpb.api_caixa_supermercado.dto.CompraRequestDTO;
+import ifpb.api_caixa_supermercado.dto.CompraResponseDTO;
 import ifpb.api_caixa_supermercado.entity.Compra;
 import ifpb.api_caixa_supermercado.entity.Produto;
 import ifpb.api_caixa_supermercado.exception.CompraInvalidaException;
 import ifpb.api_caixa_supermercado.exception.CompraNaoEncontradaException;
-import ifpb.api_caixa_supermercado.exception.ProdutoNaoEncontradoException;
+import ifpb.api_caixa_supermercado.mapper.CompraMapper;
+import ifpb.api_caixa_supermercado.mapper.ProdutoMapper;
 import ifpb.api_caixa_supermercado.repository.CompraRepository;
 import ifpb.api_caixa_supermercado.repository.ProdutoRepository;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static ifpb.api_caixa_supermercado.mapper.CompraMapper.toCompra;
+import static ifpb.api_caixa_supermercado.mapper.CompraMapper.toCompraResponseDTO;
 
 @Service
 public class CompraService {
@@ -23,74 +28,48 @@ public class CompraService {
         this.produtoRepository = produtoRepository;
     }
 
-    public Compra postCompra(Compra compra){
-        if(compra == null) {
-            throw new CompraInvalidaException();
+    public CompraResponseDTO salvarCompra(CompraRequestDTO compraRequestDTO){
+        if (compraRequestDTO.produtosCompra().isEmpty()) {
+            throw new CompraInvalidaException("Compra sem produtos");
         }
-        return compraRepository.postCompra(compra);
+        Compra compra = toCompra(compraRequestDTO);
+        return toCompraResponseDTO(compraRepository.salvarCompra(compra));
     }
 
-    public Compra postCompra(){
-        return compraRepository.postCompra();
-    }
-
-    public Compra getCompra(Integer id){
-        Compra compra = compraRepository.getCompra(id);
+    public CompraResponseDTO buscarCompraPorId(Integer id){
+        Compra compra = compraRepository.buscarCompraPorId(id);
         if (compra == null) {
-            throw new CompraNaoEncontradaException();
+            throw new CompraNaoEncontradaException("Compra nao encontrada");
         }
-        return compra;
+        return toCompraResponseDTO(compra);
     }
 
-    public Compra putCompra(Integer id, Compra compra){
+    public List<CompraResponseDTO> listarCompras() {
+        List<Compra> compras = compraRepository.listarCompras();
+        return compras.stream()
+                .map(CompraMapper::toCompraResponseDTO)
+                .toList();
+    }
+
+    public CompraResponseDTO atualizarCompra(Integer id, CompraRequestDTO compraRequestDTO){
+        Compra compra = compraRepository.buscarCompraPorId(id);
         if (compra == null) {
-            throw new CompraNaoEncontradaException();
+            throw new CompraNaoEncontradaException("Compra nao encontrada");
         }
-        if (compra.getId() == null) {
-            throw new CompraNaoEncontradaException();
-        }
-        return  compraRepository.putCompra(id, compra);
+        List<Produto> produtos = compraRequestDTO.produtosCompra().stream()
+                .map(ProdutoMapper::toProduto)
+                .toList();
+        compra.setProdutosCompra(produtos);
+        compra.setFormaPagamento(compraRequestDTO.formaPagamento());
+        compra.setValorCompra(compra.calcularValorTotal());
+        return  toCompraResponseDTO(compraRepository.atualizarCompra(compra));
     }
 
-    public void deleteCompra(Integer id){
-        Compra compra = compraRepository.getCompra(id);
-        if (compra == null){
-            throw  new CompraNaoEncontradaException();
-        }
-        produtoRepository.deleteProduto(id);
-    }
-
-    @Transactional
-    public Compra addProduto(Integer compraId, Integer produtoId) {
-        Compra compra = compraRepository.getCompra(compraId);
+    public void removerCompra(Integer id){
+        Compra compra = compraRepository.buscarCompraPorId(id);
         if (compra == null) {
-            throw  new CompraNaoEncontradaException();
+            throw new CompraNaoEncontradaException("Compra nao encontrada");
         }
-        Produto produto = produtoRepository.getProduto(produtoId);
-        if (produto == null) {
-            throw new ProdutoNaoEncontradoException();
-        }
-        compra.addProduto(produto);
-        compra.setValorCompra(compra.getValorTotal());
-        return compra;
-    }
-
-    @Transactional
-    public Compra removeProduto(int compraId, int produtoId) {
-        Compra compra = compraRepository.getCompra(compraId);
-        if (compra == null) {
-            throw  new CompraNaoEncontradaException();
-        }
-        Produto produto = produtoRepository.getProduto(produtoId);
-        if (produto == null) {
-            throw new ProdutoNaoEncontradoException();
-        }
-        compra.removeProduto(produto);
-        compra.setValorCompra(compra.getValorTotal());
-        return compra;
-    }
-
-    public List<Compra> getCompras() {
-        return compraRepository.getCompras();
+        produtoRepository.removerProduto(id);
     }
 }

@@ -15,31 +15,30 @@ public class ProdutoRepository {
     private EntityManager entityManager;
 
     @Transactional
-    public Produto postProduto(Produto produto) {
+    public Produto salvarProduto(Produto produto) {
         entityManager.persist(produto);
         return produto;
     }
 
-    public Produto getProduto(Integer id) {
+    public Produto buscarProdutoPorId(Integer id) {
         return entityManager.find(Produto.class, id);
     }
 
+    public Produto buscarProdutoPorNome(String nome) {
+        return entityManager.find(Produto.class, nome);
+    }
+
+    public List<Produto> listarProdutos() {
+        return entityManager.createQuery("from Produto", Produto.class).getResultList();
+    }
+
     @Transactional
-    public Produto putProduto(Integer id, Produto produto) {
-        produto.setId(id);
+    public Produto atualizarProduto(Produto produto) {
         return entityManager.merge(produto);
     }
 
     @Transactional
-    public void deleteProduto(Integer id) {
-        Produto produto = entityManager.find(Produto.class, id);
-        if (produto != null) {
-            entityManager.remove(produto);
-        }
+    public void removerProduto(Integer id) {
+        entityManager.remove(entityManager.find(Produto.class, id));
     }
-
-    public List<Produto> getProdutos() {
-        return entityManager.createQuery("from Produto", Produto.class).getResultList();
-    }
-
 }

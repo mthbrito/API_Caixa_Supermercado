@@ -1,12 +1,18 @@
 package ifpb.api_caixa_supermercado.service;
 
+import ifpb.api_caixa_supermercado.dto.ProdutoRequestDTO;
+import ifpb.api_caixa_supermercado.dto.ProdutoResponseDTO;
 import ifpb.api_caixa_supermercado.entity.Produto;
 import ifpb.api_caixa_supermercado.exception.ProdutoInvalidoException;
 import ifpb.api_caixa_supermercado.exception.ProdutoNaoEncontradoException;
+import ifpb.api_caixa_supermercado.mapper.ProdutoMapper;
 import ifpb.api_caixa_supermercado.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static ifpb.api_caixa_supermercado.mapper.ProdutoMapper.toProduto;
+import static ifpb.api_caixa_supermercado.mapper.ProdutoMapper.toProdutoResponseDTO;
 
 @Service
 public class ProdutoService {
@@ -17,40 +23,45 @@ public class ProdutoService {
         this.produtoRepository = produtoRepository;
     }
 
-    public Produto postProduto(Produto produto) {
-        if (produto == null) {
-            throw new ProdutoInvalidoException();
+    public ProdutoResponseDTO salvarProduto(ProdutoRequestDTO produtoRequestDTO) {
+        if (produtoRepository.buscarProdutoPorNome(produtoRequestDTO.nome()) == null) {
+            throw new ProdutoInvalidoException("Produto já existe com esse nome");
         }
-        return produtoRepository.postProduto(produto);
+        Produto produto = toProduto(produtoRequestDTO);
+        return toProdutoResponseDTO(produtoRepository.salvarProduto(produto));
     }
 
-    public Produto getProduto(Integer id) {
-        Produto produto = produtoRepository.getProduto(id);
+    public ProdutoResponseDTO buscarProdutoPorId(Integer id) {
+        Produto produto = produtoRepository.buscarProdutoPorId(id);
         if (produto == null) {
-            throw new ProdutoNaoEncontradoException();
+            throw new ProdutoNaoEncontradoException("Produto não encontrado");
         }
-        return produto;
+        return toProdutoResponseDTO(produto);
     }
 
-    public Produto putProduto(Integer id, Produto produto) {
-        if (produto == null) {
-            throw new ProdutoInvalidoException();
-        }
-        if (produtoRepository.getProduto(id) == null) {
-            throw new ProdutoNaoEncontradoException();
-        }
-        return produtoRepository.putProduto(id, produto);
+    public List<ProdutoResponseDTO> listarProdutos() {
+        List<Produto> produtos = produtoRepository.listarProdutos();
+        return produtos.stream()
+                .map(ProdutoMapper::toProdutoResponseDTO)
+                .toList();
     }
 
-    public void deleteProduto(Integer id) {
-        Produto produto = produtoRepository.getProduto(id);
+    public ProdutoResponseDTO atualizarProduto(Integer id, ProdutoRequestDTO produtoRequestDTO) {
+        Produto produto = produtoRepository.buscarProdutoPorId(id);
         if (produto == null) {
-            throw new ProdutoNaoEncontradoException();
+            throw new ProdutoNaoEncontradoException("Produto não encontrado");
         }
-        produtoRepository.deleteProduto(id);
+        produto.setNome(produtoRequestDTO.nome());
+        produto.setPreco(produtoRequestDTO.preco());
+        produto.setUnidade(produtoRequestDTO.unidade());
+        return toProdutoResponseDTO(produtoRepository.atualizarProduto(produto));
     }
 
-    public List<Produto> getProdutos() {
-        return produtoRepository.getProdutos();
+    public void removerProduto(Integer id) {
+        Produto produto = produtoRepository.buscarProdutoPorId(id);
+        if (produto == null) {
+            throw new ProdutoNaoEncontradoException("Produto não encontrado");
+        }
+        produtoRepository.removerProduto(id);
     }
 }

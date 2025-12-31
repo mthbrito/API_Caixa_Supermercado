@@ -1,7 +1,9 @@
 package ifpb.api_caixa_supermercado.controller;
 
-import ifpb.api_caixa_supermercado.entity.Produto;
+import ifpb.api_caixa_supermercado.dto.ProdutoRequestDTO;
+import ifpb.api_caixa_supermercado.dto.ProdutoResponseDTO;
 import ifpb.api_caixa_supermercado.service.ProdutoService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,28 +22,28 @@ public class ProdutoController {
     }
 
     @PostMapping
-    public ResponseEntity<Produto> postProduto(@RequestBody Produto produto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(produtoService.postProduto(produto));
+    public ResponseEntity<ProdutoResponseDTO> salvarProduto(@Valid @RequestBody ProdutoRequestDTO produtoRequestDTO) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(produtoService.salvarProduto(produtoRequestDTO));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Produto> getProduto(@PathVariable Integer id) {
-        return ResponseEntity.ok(produtoService.getProduto(id));
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<Produto> putProduto(@PathVariable Integer id, @RequestBody Produto produto) {
-        return ResponseEntity.ok(produtoService.putProduto(id, produto));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduto(@PathVariable Integer id) {
-        produtoService.deleteProduto(id);
-        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
+    public ResponseEntity<ProdutoResponseDTO> buscarProdutoPorId(@PathVariable Integer id) {
+        return ResponseEntity.ok(produtoService.buscarProdutoPorId(id));
     }
 
     @GetMapping
-    public ResponseEntity<List<Produto>> getProdutos() {
-        return ResponseEntity.ok(produtoService.getProdutos());
+    public ResponseEntity<List<ProdutoResponseDTO>> listarProdutos() {
+        return ResponseEntity.ok(produtoService.listarProdutos());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProdutoResponseDTO> atualizarProduto(@PathVariable Integer id, @Valid @RequestBody ProdutoRequestDTO produtoRequestDTO) {
+        return ResponseEntity.ok(produtoService.atualizarProduto(id, produtoRequestDTO));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> removerProduto(@PathVariable Integer id) {
+        produtoService.removerProduto(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

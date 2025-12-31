@@ -15,38 +15,26 @@ public class CompraRepository {
     private EntityManager entityManager;
 
     @Transactional
-    public Compra postCompra(Compra compra){
+    public Compra salvarCompra(Compra compra) {
         entityManager.persist(compra);
         return compra;
     }
 
-    @Transactional
-    public Compra postCompra(){
-        Compra compra = new Compra();
-        entityManager.persist(compra);
-        return compra;
-    }
-
-    public Compra getCompra(Integer id){
+    public Compra buscarCompraPorId(Integer id) {
         return entityManager.find(Compra.class, id);
     }
 
+    public List<Compra> listarCompras() {
+        return entityManager.createQuery("from Compra", Compra.class).getResultList();
+    }
+
     @Transactional
-    public Compra putCompra(Integer id, Compra compra){
-        compra.setId(id);
+    public Compra atualizarCompra(Compra compra) {
         return entityManager.merge(compra);
     }
 
     @Transactional
-    public void deleteCompra(Integer id){
-        Compra compra = entityManager.find(Compra.class, id);
-        if (compra != null) {
-            entityManager.remove(compra);
-        }
+    public void removerCompra(Integer id) {
+        entityManager.remove(entityManager.find(Compra.class, id));
     }
-
-    public List<Compra> getCompras(){
-        return entityManager.createQuery("from Compra", Compra.class).getResultList();
-    }
-
 }
