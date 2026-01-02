@@ -7,14 +7,12 @@ import ifpb.api_caixa_supermercado.entity.Produto;
 import ifpb.api_caixa_supermercado.exception.CompraInvalidaException;
 import ifpb.api_caixa_supermercado.exception.CompraNaoEncontradaException;
 import ifpb.api_caixa_supermercado.mapper.CompraMapper;
-import ifpb.api_caixa_supermercado.mapper.ProdutoMapper;
 import ifpb.api_caixa_supermercado.repository.CompraRepository;
 import ifpb.api_caixa_supermercado.repository.ProdutoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-import static ifpb.api_caixa_supermercado.mapper.CompraMapper.toCompra;
 import static ifpb.api_caixa_supermercado.mapper.CompraMapper.toCompraResponseDTO;
 
 @Service
@@ -32,7 +30,10 @@ public class CompraService {
         if (compraRequestDTO.produtosCompra().isEmpty()) {
             throw new CompraInvalidaException("Compra sem produtos");
         }
-        Compra compra = toCompra(compraRequestDTO);
+        List<Produto> produtos = compraRequestDTO.produtosCompra().stream()
+                .map(produtoRepository::buscarProdutoPorId)
+                .toList();
+        Compra compra = new Compra(produtos, compraRequestDTO.formaPagamento());
         return toCompraResponseDTO(compraRepository.salvarCompra(compra));
     }
 
@@ -57,7 +58,7 @@ public class CompraService {
             throw new CompraNaoEncontradaException("Compra nao encontrada");
         }
         List<Produto> produtos = compraRequestDTO.produtosCompra().stream()
-                .map(ProdutoMapper::toProduto)
+                .map(produtoRepository::buscarProdutoPorId)
                 .toList();
         compra.setProdutosCompra(produtos);
         compra.setFormaPagamento(compraRequestDTO.formaPagamento());

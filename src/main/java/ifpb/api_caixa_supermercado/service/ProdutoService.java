@@ -24,7 +24,7 @@ public class ProdutoService {
     }
 
     public ProdutoResponseDTO salvarProduto(ProdutoRequestDTO produtoRequestDTO) {
-        if (produtoRepository.buscarProdutoPorNome(produtoRequestDTO.nome()) == null) {
+        if (!produtoRepository.buscarProdutoPorNome(produtoRequestDTO.nome()).isEmpty()) {
             throw new ProdutoInvalidoException("Produto já existe com esse nome");
         }
         Produto produto = toProduto(produtoRequestDTO);

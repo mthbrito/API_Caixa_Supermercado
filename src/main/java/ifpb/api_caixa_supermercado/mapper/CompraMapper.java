@@ -10,16 +10,6 @@ import java.util.List;
 
 public class CompraMapper {
 
-    public static Compra toCompra(CompraRequestDTO compraRequestDTO) {
-        List<Produto> produtos = compraRequestDTO.produtosCompra().stream()
-                .map(ProdutoMapper::toProduto)
-                .toList();
-        return new Compra(
-                produtos,
-                compraRequestDTO.formaPagamento()
-        );
-    }
-
     public static CompraResponseDTO toCompraResponseDTO(Compra compra) {
         List<ProdutoResponseDTO> produtosDTO = compra.getProdutosCompra().stream()
                 .map(ProdutoMapper::toProdutoResponseDTO)

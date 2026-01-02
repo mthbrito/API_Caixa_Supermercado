@@ -24,8 +24,11 @@ public class ProdutoRepository {
         return entityManager.find(Produto.class, id);
     }
 
-    public Produto buscarProdutoPorNome(String nome) {
-        return entityManager.find(Produto.class, nome);
+    public List<Produto> buscarProdutoPorNome(String nome) {
+        return entityManager
+                .createQuery("SELECT p FROM Produto p WHERE p.nome = :nome", Produto.class)
+                .setParameter("nome", nome)
+                .getResultList();
     }
 
     public List<Produto> listarProdutos() {

@@ -10,7 +10,7 @@ import java.util.List;
 public record CompraRequestDTO(
         @NotEmpty
         @Valid
-        List<ProdutoRequestDTO> produtosCompra,
+        List<Integer> produtosCompra,
         @NotNull
         FormaPagamento formaPagamento) {
 }
